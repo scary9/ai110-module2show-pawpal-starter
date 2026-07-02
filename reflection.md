@@ -3,14 +3,38 @@
 ## 1. System Design
 
 **a. Initial design**
+- Core Logic: Three core actions that the software should include would be adding a pet and its profile, adding an owner profile and including preferences and contraints for the owner, and creating a daily plan that accounts for time, action, and contraints for each pet. For the daily plan, a linear calendar-like format would be ideal. 
+
+- BRAINSTORMING:
+    - each owner profile should have preferred time and preferences
+        ~ add pet
+        ~ remove pet
+        ~ update avaliability
+        ~ update preferences
+    - each pet profile should have attributes included (walks, meds, grooms, etc) and assigned owners
+        ~ update priority
+        ~ feed pet
+        ~ walk pet
+        ~ groom pet
+        ~ feed
+        ~ play
+    - each daily plan should specify each pet the plan is for and fit the time constraints of the owner and explain reasoning
+        ~ add tasks
+        ~ remove tasks
+        ~ get description (why is the plan effective for the assistant and pets)
 
 - Briefly describe your initial UML design.
+My initial UML design was short and consise, but lacked a few features to combat edge case scenarios. 
 - What classes did you include, and what responsibilities did you assign to each?
+The classes I included for my UML was a class for the owner of each pet featuring functions like add pet. Another class was for the specific pet and featured functions like feed. The last class was a plan class that documented the plans for each pet and featured functions such as add tasks to the plan.
 
 **b. Design changes**
 
-- Did your design change during implementation?
+- Did your design change during implementation? 
+Yes.
+ 
 - If yes, describe at least one change and why you made it.
+When the AI coding assistant generated the UML then subsequently the skeleton, I later noticed the AI added features that were beyond the scope of what I aksed for--the software could be much simpler. I went back through and told the coding assistant to drop the creation of a task doer since that overcomplicated the program. Additionally, I asked the AI to drop the creation of a Scheduler since that was not needed. Moreover, the coding assitant created the UML with the scenario of there being multiple owners. I make things simpler, I adjusted the program to model having only one owner. As a result, I was able to trim the amount of code in the skeleton to be cleaner and more efficent. Lastly, after the changes were implemented, tasks now have an end, same name pets count as seperate types of pets, and removed the pet-counter box. 
 
 ---
 

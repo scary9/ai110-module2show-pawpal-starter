@@ -1,15 +1,70 @@
 classDiagram
-    %% Replace the placeholders below with your actual classes, attributes, methods, and relationships.
-    %% Keep this file updated so it matches your final implementation.
+    %% PawPal+ UML — single-owner model, from reflection.md + README scenario
 
-    class ClassName {
-        +type attribute
-        +method() returnType
+    class Owner {
+        +String name
+        +DateTime preferredTime
+        +List~String~ preferences
+        +List~TimeSlot~ availability
+        +List~Pet~ pets
+        +addPet(pet Pet) void
+        +removePet(pet Pet) void
+        +updateAvailability(slots List~TimeSlot~) void
+        +updatePreferences(prefs List~String~) void
     }
 
-    class AnotherClass {
-        +type attribute
-        +method() returnType
+    class Pet {
+        +String name
+        +String species
+        +int priority
+        +List~CareNeed~ careNeeds
+        +updatePriority(level int) void
+        +feed() void
+        +walk() void
+        +groom() void
+        +play() void
     }
 
-    ClassName --> AnotherClass : relationship
+    class CareNeed {
+        +String type
+        +int frequency
+        +int durationMinutes
+    }
+
+    class TimeSlot {
+        +DateTime start
+        +DateTime end
+        +overlaps(other TimeSlot) bool
+    }
+
+    class Task {
+        +String action
+        +DateTime startTime
+        +int durationMinutes
+        +Pet pet
+        +CareNeed careNeed
+        +int priority
+        +endTime() DateTime
+        +conflictsWith(other Task) bool
+    }
+
+    class DailyPlan {
+        +Date date
+        +Owner owner
+        +List~Task~ tasks
+        +pets() Set~Pet~
+        +generate(owner Owner, day Date)$ DailyPlan
+        +addTask(task Task) void
+        +removeTask(task Task) void
+        +fitsConstraints() bool
+        +display() String
+    }
+
+    %% Relationships
+    Owner "1" o-- "0..*" Pet : cares for
+    Pet "1" o-- "0..*" CareNeed : has
+    Owner "1" --> "0..*" TimeSlot : available during
+    DailyPlan "1" o-- "0..*" Task : contains
+    DailyPlan "0..*" --> "1" Owner : planned for
+    Task "0..*" --> "1" Pet : scheduled for
+    Task "0..*" --> "0..1" CareNeed : satisfies
