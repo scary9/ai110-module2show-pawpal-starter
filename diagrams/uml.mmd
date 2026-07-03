@@ -1,15 +1,15 @@
 classDiagram
-    %% PawPal+ UML — single-owner model, from reflection.md + README scenario
+    %% PawPal+ UML — four-class single-owner model (reflection.md + README)
 
     class Owner {
         +String name
         +DateTime preferredTime
         +List~String~ preferences
-        +List~TimeSlot~ availability
+        +List~Tuple~ availability
         +List~Pet~ pets
         +addPet(pet Pet) void
         +removePet(pet Pet) void
-        +updateAvailability(slots List~TimeSlot~) void
+        +updateAvailability(slots List~Tuple~) void
         +updatePreferences(prefs List~String~) void
     }
 
@@ -17,7 +17,7 @@ classDiagram
         +String name
         +String species
         +int priority
-        +List~CareNeed~ careNeeds
+        +List~Tuple~ careNeeds
         +updatePriority(level int) void
         +feed() void
         +walk() void
@@ -25,24 +25,12 @@ classDiagram
         +play() void
     }
 
-    class CareNeed {
-        +String type
-        +int frequency
-        +int durationMinutes
-    }
-
-    class TimeSlot {
-        +DateTime start
-        +DateTime end
-        +overlaps(other TimeSlot) bool
-    }
-
     class Task {
         +String action
         +DateTime startTime
         +int durationMinutes
         +Pet pet
-        +CareNeed careNeed
+        +String careNeed
         +int priority
         +endTime() DateTime
         +conflictsWith(other Task) bool
@@ -62,9 +50,6 @@ classDiagram
 
     %% Relationships
     Owner "1" o-- "0..*" Pet : cares for
-    Pet "1" o-- "0..*" CareNeed : has
-    Owner "1" --> "0..*" TimeSlot : available during
-    DailyPlan "1" o-- "0..*" Task : contains
     DailyPlan "0..*" --> "1" Owner : planned for
+    DailyPlan "1" o-- "0..*" Task : contains
     Task "0..*" --> "1" Pet : scheduled for
-    Task "0..*" --> "0..1" CareNeed : satisfies
