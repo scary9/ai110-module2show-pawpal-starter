@@ -13,11 +13,14 @@ mittens = Pet(name="Mittens", species="Cat")
 owner.add_pet(biscuit)
 owner.add_pet(mittens)
 
-biscuit.add_task(Task("Morning walk", datetime(today.year, today.month, today.day, 8, 0), 30, priority="high"))
-mittens.add_task(Task("Feeding", datetime(today.year, today.month, today.day, 9, 0), 10, priority="high"))
+# Added out of time order on purpose to check the plan sorts them.
 biscuit.add_task(Task("Dinner", datetime(today.year, today.month, today.day, 18, 0), 15, priority="medium"))
+mittens.add_task(Task("Feeding", datetime(today.year, today.month, today.day, 8, 0), 10, priority="high"))
+biscuit.add_task(Task("Morning walk", datetime(today.year, today.month, today.day, 8, 0), 30, priority="high"))
 
-plan = DailyPlan.generate(owner, today)
+plan = DailyPlan(date=today, owner=owner, tasks=owner.all_tasks())
+plan.sort_by_time()
 
 print("Today's Schedule")
 print(plan.display())
+print(plan.conflict_warning())

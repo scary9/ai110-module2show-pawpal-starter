@@ -29,6 +29,10 @@ from datetime import date, datetime, timedelta
 # a plan (lower rank number = scheduled earlier when there's competition).
 PRIORITY_RANK = {"high": 0, "medium": 1, "low": 2}
 
+# How far ahead the next occurrence of a recurring task lands. Any frequency
+# not listed here (e.g. "once") is treated as non-recurring.
+FREQUENCY_DELTA = {"daily": timedelta(days=1), "weekly": timedelta(weeks=1)}
+
 
 @dataclass(eq=False)
 class Task:
@@ -58,9 +62,35 @@ class Task:
         """True if this task's time window overlaps another's."""
         return self.start_time < other.end_time and other.start_time < self.end_time
 
-    def mark_complete(self) -> None:
-        """Mark this task as done."""
+    def next_occurrence(self) -> "Task | None":
+        """A fresh, incomplete copy of this task at its next scheduled time,
+        or None if the task isn't recurring.
+        """
+        delta = FREQUENCY_DELTA.get(self.frequency)
+        if delta is None:
+            return None
+        return Task(
+            description=self.description,
+            start_time=self.start_time + delta,
+            duration_minutes=self.duration_minutes,
+            frequency=self.frequency,
+            priority=self.priority,
+        )
+
+    def mark_complete(self) -> "Task | None":
+        """Mark this task done and, if it recurs, schedule its next occurrence.
+
+        The new occurrence is attached to the same pet. Returns it, or None if
+        the task doesn't recur. Calling this on an already-done task is a no-op
+        (returns None) so occurrences aren't spawned twice.
+        """
+        if self.done:
+            return None
         self.done = True
+        nxt = self.next_occurrence()
+        if nxt is not None and self.pet is not None:
+            self.pet.add_task(nxt)
+        return nxt
 
     def mark_incomplete(self) -> None:
         """Mark this task as not done."""
@@ -131,6 +161,30 @@ class Owner:
         """Single access point: flatten every task across all pets."""
         return [task for pet in self.pets for task in pet.tasks]
 
+    def filter_tasks(
+        self, done: bool | None = None, pet_name: str | None = None
+    ) -> list[Task]:
+        """Tasks matching the given filters.
+
+        done     : keep only completed (True) or incomplete (False) tasks;
+                   None means don't filter on completion.
+        pet_name : keep only tasks belonging to the pet with this name
+                   (case-insensitive); None means don't filter on pet.
+
+        Filters combine with AND. With no arguments, returns all tasks.
+        """
+        # Narrow to the named pet's tasks up front instead of flattening every
+        # pet's tasks and discarding most; casefold once per pet, not per task.
+        if pet_name is None:
+            tasks = self.all_tasks()
+        else:
+            key = pet_name.casefold()
+            tasks = [t for pet in self.pets if pet.name.casefold() == key for t in pet.tasks]
+
+        if done is None:
+            return list(tasks)
+        return [t for t in tasks if t.done == done]
+
 
 @dataclass
 class DailyPlan:
@@ -159,8 +213,12 @@ class DailyPlan:
         )
         for task in candidates:
             plan.add_task(task)
-        plan.tasks.sort(key=lambda t: t.start_time)
+        plan.sort_by_time()
         return plan
+
+    def sort_by_time(self) -> None:
+        """Sort this plan's tasks in place, earliest start_time first."""
+        self.tasks.sort(key=lambda t: t.start_time)
 
     def add_task(self, task: Task) -> bool:
         """Add a task only if it fits availability and creates no conflict.
@@ -170,7 +228,7 @@ class DailyPlan:
         if not self._fits(task):
             return False
         self.tasks.append(task)
-        self.tasks.sort(key=lambda t: t.start_time)
+        self.sort_by_time()
         return True
 
     def remove_task(self, task: Task) -> None:
@@ -188,6 +246,50 @@ class DailyPlan:
                 if task.conflicts_with(other):
                     return False
         return True
+
+    def time_conflicts(self) -> list[tuple[Task, Task, str]]:
+        """Every pair of scheduled tasks whose time windows overlap, each
+        tagged "same-pet" or "different-pet".
+
+        "same-pet"      : both tasks belong to the same animal (can't be in two
+                          places at once).
+        "different-pet" : the tasks are for different pets, so the owner is
+                          double-booked across animals.
+
+        The plan is kept sorted by start_time, so the inner scan stops as soon
+        as a later task starts after the current one ends -- no task beyond that
+        can overlap.
+        """
+        conflicts: list[tuple[Task, Task, str]] = []
+        for i, task in enumerate(self.tasks):
+            for other in self.tasks[i + 1:]:
+                if other.start_time >= task.end_time:
+                    break  # sorted: nothing further can overlap `task`
+                same = task.pet is not None and task.pet is other.pet
+                conflicts.append((task, other, "same-pet" if same else "different-pet"))
+        return conflicts
+
+    def conflict_warning(self) -> str:
+        """A human-readable warning describing any time overlaps, or an empty
+        string if the plan is conflict-free.
+
+        Lightweight and non-raising: it reports problems instead of throwing,
+        so callers can display the result directly without a try/except and the
+        program keeps running.
+        """
+        conflicts = self.time_conflicts()
+        if not conflicts:
+            return ""
+        lines = [f"⚠️  {len(conflicts)} scheduling conflict(s) detected:"]
+        for a, b, kind in conflicts:
+            a_pet = a.pet.name if a.pet else "?"
+            b_pet = b.pet.name if b.pet else "?"
+            note = "same pet" if kind == "same-pet" else "different pets"
+            lines.append(
+                f"  • {a.start_time:%H:%M} {a.description} ({a_pet}) overlaps "
+                f"{b.start_time:%H:%M} {b.description} ({b_pet}) — {note}"
+            )
+        return "\n".join(lines)
 
     def display(self) -> str:
         """Render the plan in a calendar-like, readable format."""

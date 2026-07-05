@@ -47,11 +47,11 @@ pip install -r requirements.txt
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+Today's Schedule
+Daily plan for Sam — 2026-07-03
+  [ ] 08:00 — Morning walk for Biscuit (30 min) [priority: high]
+  [ ] 09:00 — Feeding for Mittens (10 min) [priority: high]
+  [ ] 18:00 — Dinner for Biscuit (15 min) [priority: medium]
 ```
 
 ## 🧪 Testing PawPal+
@@ -72,14 +72,12 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `DailyPlan.generate`, `DailyPlan.sort_by_time` | By priority, then by start time. |
+| Filtering | `Owner.filter_tasks` | By completion status and/or pet name. |
+| Conflict handling | `DailyPlan.time_conflicts`, `DailyPlan.conflict_warning` | Flags overlapping tasks as same- or different-pet; warns instead of crashing. |
+| Recurring tasks | `Task.mark_complete`, `Task.next_occurrence` | Daily/weekly tasks spawn the next occurrence when completed. |
 
 ## 📸 Demo Walkthrough
 

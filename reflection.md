@@ -42,13 +42,15 @@ When the AI coding assistant generated the UML then subsequently the skeleton, I
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
+- What constraints does your scheduler consider (for example: time, priority, preferences)? 
 - How did you decide which constraints mattered most?
 
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+One tradeoff my scheduler makes is longer lines of code but lower in nesting which is good for readability. 
 - Why is that tradeoff reasonable for this scenario?
+This tradeoff is reasonable because before, a list of all pets' tasks would be created for only one pet. 
 
 ---
 
