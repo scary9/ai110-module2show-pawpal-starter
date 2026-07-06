@@ -1,0 +1,64 @@
+classDiagram
+    %% PawPal+ UML — final four-class single-owner model (matches pawpal_system.py)
+
+    class Owner {
+        +String name
+        +DateTime preferredTime
+        +List~String~ preferences
+        +List~Tuple~ availability
+        +List~Pet~ pets
+        +addPet(pet Pet) void
+        +removePet(pet Pet) void
+        +updateAvailability(slots List~Tuple~) void
+        +updatePreferences(prefs List~String~) void
+        +allTasks() List~Task~
+        +filterTasks(done bool, petName String) List~Task~
+    }
+
+    class Pet {
+        +String name
+        +String species
+        +String priority
+        +List~Task~ tasks
+        +addTask(task Task) void
+        +removeTask(task Task) void
+        +getTasks() List~Task~
+        +updatePriority(level String) void
+    }
+
+    class Task {
+        +String description
+        +DateTime startTime
+        +int durationMinutes
+        +String frequency
+        +String priority
+        +bool done
+        +Pet pet
+        +endTime() DateTime
+        +conflictsWith(other Task) bool
+        +nextOccurrence() Task
+        +markComplete() Task
+        +markIncomplete() void
+    }
+
+    class DailyPlan {
+        +Date date
+        +Owner owner
+        +List~Task~ tasks
+        +pets() Set~Pet~
+        +generate(owner Owner, day Date)$ DailyPlan
+        +sortByTime() void
+        +addTask(task Task) bool
+        +removeTask(task Task) void
+        +fitsConstraints() bool
+        +timeConflicts() List~Tuple~
+        +conflictWarning() String
+        +display() String
+    }
+
+    %% Relationships
+    Owner "1" o-- "0..*" Pet : cares for
+    Pet "1" *-- "0..*" Task : has
+    DailyPlan "0..*" --> "1" Owner : planned for
+    DailyPlan "1" --> "0..*" Task : schedules
+    Task "0..*" --> "1" Pet : belongs to

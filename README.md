@@ -67,7 +67,16 @@ pytest --cov
 Sample test output:
 
 ```
-# Paste your pytest output here
+================================================= test session starts ==================================================
+platform darwin -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/shaylacary/ai110/projects/ai110-module2show-pawpal-starter
+plugins: anyio-4.14.1
+collected 12 items                                                                                                     
+
+tests/test_pawpal.py ............                                                                                [100%]
+
+================================================== 12 passed in 0.02s ==================================================
+5 Stars
 ```
 
 ## 📐 Smarter Scheduling
@@ -81,12 +90,26 @@ Sample test output:
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+**Features:** Sorting by time · Priority ordering · Conflict warnings · Filtering by pet/status · Daily & weekly recurrence
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+Follow along in the app (`app.py`):
+
+1. **Start with the seeded owner and pets** — owner *Sam* with *Biscuit* (Golden Retriever) and *Mittens* (Cat).
+2. **View pets and tasks** in a table, and filter by pet or status (All / To do / Done).
+3. **Click "Generate schedule"** to build today's plan.
+4. **See the plan sorted by time** — tasks entered out of order come out chronologically, high priority first.
+5. **Read the conflict warning** — the overlapping 08:00 walk and feeding are flagged as a *different-pet* conflict instead of crashing.
+
+Sample CLI output (`python main.py`):
+
+```
+Today's Schedule
+Daily plan for Sam — 2026-07-05
+  [ ] 08:00 — Morning walk for Biscuit (30 min) [priority: high]
+  [ ] 08:00 — Feeding for Mittens (10 min) [priority: high]
+  [ ] 18:00 — Dinner for Biscuit (15 min) [priority: medium]
+⚠️  1 scheduling conflict(s) detected:
+  • 08:00 Morning walk (Biscuit) overlaps 08:00 Feeding (Mittens) — different pets
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

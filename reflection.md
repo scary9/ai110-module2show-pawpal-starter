@@ -43,7 +43,9 @@ When the AI coding assistant generated the UML then subsequently the skeleton, I
 **a. Constraints and priorities**
 
 - What constraints does your scheduler consider (for example: time, priority, preferences)? 
+One of the constraints my scheduler considers is time using the datetime class. Another constraint my scheduler considers is priority for the task. For example, a task can have a high, medium, or low priority. 
 - How did you decide which constraints mattered most?
+For my scheduler, the constraint that mattered the most was priority due to the filtering and sorting system of the app.
 
 **b. Tradeoffs**
 
@@ -59,12 +61,16 @@ This tradeoff is reasonable because before, a list of all pets' tasks would be c
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+During the project, I used the AI tools to refactor method implementations for performance and efficiency. Another way I used the AI tools was for debugging the code and for understanding. Using the AI coding assistant as a bridge for implementation and learning was helpful. 
 - What kinds of prompts or questions were most helpful?
+Asking why the implementation was the most efficient approach for app design allowed me to understand the backend of the assignment. 
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
+When drafting my UUML design, the AI suggested features that went beyond the scope of the project.
 - How did you evaluate or verify what the AI suggested?
+Referring to the assignment instructions and the README to evaluate the suggestions that the AI gave allowd me to determine that some features were beyond the scope, such as the use of an API.
 
 ---
 
@@ -73,12 +79,16 @@ This tradeoff is reasonable because before, a list of all pets' tasks would be c
 **a. What you tested**
 
 - What behaviors did you test?
+The behaviors I tested were adding a pet and task for a pet.
 - Why were these tests important?
+These tests were important because if these features were not implemented correctly, the sorting and filtering logic would not work properly. 
 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+I am fairly confident that my scheduler works correctly because I thoroughly investigated the AI suggestions for the efficiency of the app.
 - What edge cases would you test next if you had more time?
+The edge cases I would test next time if I had more time would be testing owner avaliability.
 
 ---
 
@@ -87,11 +97,14 @@ This tradeoff is reasonable because before, a list of all pets' tasks would be c
 **a. What went well**
 
 - What part of this project are you most satisfied with?
+The part of the project that went well was implementing the features such as the filering, sorting, and conflict warnings. The AI coding assignment provided comments that allowed me to assess if something was needed or not and make the design process enjoyable. 
 
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
+If I had another iteration, I would redesign why the task was dropped once removed.
 
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+One important think I have learning about designing systems is taking one step at a time. By blocking each step, reviewing, accepting, and declining recommendations in chunks allowed for a smoother implementation process. It could also help implement the code faster. 

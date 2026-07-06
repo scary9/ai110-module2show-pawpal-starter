@@ -67,16 +67,39 @@ st.divider()
 # Read straight from the Owner object so the UI always reflects real state.
 st.subheader("Current Pets & Tasks")
 if owner.pets:
-    for pet in owner.pets:
-        st.markdown(f"**{pet.name}** ({pet.species}) — priority: {pet.priority}")
-        if pet.tasks:
-            for t in pet.tasks:
-                st.write(
-                    f"- {t.start_time.strftime('%H:%M')} — {t.description} "
-                    f"({t.duration_minutes} min) [{t.priority}]"
-                )
-        else:
-            st.caption("No tasks yet.")
+    # Filter controls backed by Owner.filter_tasks so the table reflects the
+    # same logic the scheduler uses -- no parallel filtering in the UI.
+    col_pet, col_status = st.columns(2)
+    pet_choice = col_pet.selectbox(
+        "Pet", ["All"] + [pet.name for pet in owner.pets]
+    )
+    status_choice = col_status.selectbox("Status", ["All", "To do", "Done"])
+
+    pet_name = None if pet_choice == "All" else pet_choice
+    done = {"All": None, "To do": False, "Done": True}[status_choice]
+
+    # Show tasks sorted by start time for a clean, calendar-like table.
+    tasks = sorted(
+        owner.filter_tasks(done=done, pet_name=pet_name),
+        key=lambda t: t.start_time,
+    )
+    if tasks:
+        rows = [
+            {
+                "Time": t.start_time.strftime("%H:%M"),
+                "Task": t.description,
+                "Pet": t.pet.name if t.pet else "?",
+                "Duration": f"{t.duration_minutes} min",
+                "Priority": t.priority.capitalize(),
+                "Frequency": t.frequency.capitalize(),
+                "Status": "✅ Done" if t.done else "⏳ To do",
+            }
+            for t in tasks
+        ]
+        st.table(rows)
+        st.caption(f"{len(tasks)} task(s) shown.")
+    else:
+        st.caption("No tasks match the current filters.")
 else:
     st.info("No pets yet. Add one above.")
 
@@ -85,5 +108,43 @@ st.divider()
 # --- Build Schedule ------------------------------------------------------
 st.subheader("Build Schedule")
 if st.button("Generate schedule"):
+    # generate() already places tasks by priority and keeps them sorted by
+    # time; sort_by_time() is called defensively in case the plan is edited.
     plan = DailyPlan.generate(owner, date.today())
-    st.text(plan.display())
+    plan.sort_by_time()
+
+    # Render the time-ordered plan as a table instead of raw text.
+    if plan.tasks:
+        st.table(
+            [
+                {
+                    "Time": t.start_time.strftime("%H:%M"),
+                    "Task": t.description,
+                    "Pet": t.pet.name if t.pet else "?",
+                    "Duration": f"{t.duration_minutes} min",
+                    "Priority": t.priority.capitalize(),
+                    "Done": "✅" if t.done else "",
+                }
+                for t in plan.tasks
+            ]
+        )
+    else:
+        st.caption("No tasks could be scheduled for today.")
+
+    # Surface the class's own conflict detection instead of re-deriving it here.
+    warning = plan.conflict_warning()
+    if warning:
+        st.warning(warning)
+        # Break the conflicts out individually so each overlap is scannable.
+        for a, b, kind in plan.time_conflicts():
+            a_pet = a.pet.name if a.pet else "?"
+            b_pet = b.pet.name if b.pet else "?"
+            label = "same pet" if kind == "same-pet" else "different pets"
+            st.caption(
+                f"⚠️ {a.start_time:%H:%M} {a.description} ({a_pet}) overlaps "
+                f"{b.start_time:%H:%M} {b.description} ({b_pet}) — {label}"
+            )
+    elif plan.fits_constraints():
+        st.success("✅ Conflict-free plan — every task fits the owner's availability.")
+    else:
+        st.info("No time conflicts, but some tasks fall outside availability windows.")
