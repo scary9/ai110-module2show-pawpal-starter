@@ -2,6 +2,7 @@
 
 from datetime import date, datetime
 
+from cli_display import render_conflict_warning, render_plan
 from pawpal_system import DailyPlan, Owner, Pet, Task
 
 today = date.today()
@@ -21,6 +22,7 @@ biscuit.add_task(Task("Morning walk", datetime(today.year, today.month, today.da
 plan = DailyPlan(date=today, owner=owner, tasks=owner.all_tasks())
 plan.sort_by_time()
 
-print("Today's Schedule")
-print(plan.display())
-print(plan.conflict_warning())
+print(render_plan(plan))
+warning = render_conflict_warning(plan)
+if warning:
+    print(warning)

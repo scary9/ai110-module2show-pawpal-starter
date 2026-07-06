@@ -88,6 +88,16 @@ tests/test_pawpal.py ............                                               
 | Conflict handling | `DailyPlan.time_conflicts`, `DailyPlan.conflict_warning` | Flags overlapping tasks as same- or different-pet; warns instead of crashing. |
 | Recurring tasks | `Task.mark_complete`, `Task.next_occurrence` | Daily/weekly tasks spawn the next occurrence when completed. |
 
+## 🎨 Output Formatting
+
+Terminal output is rendered by `cli_display.py` (kept separate from the domain model):
+
+- **Table** — `render_plan` lays the plan out as a bordered table using [`tabulate`](https://pypi.org/project/tabulate/).
+- **Emojis** — `task_emoji` picks an emoji by task type (🚶 walk, 🍽️ feed, 💊 meds…).
+- **Color** — priority (🔴/🟡/🟢) and status (✅/⏳) are ANSI-colored; auto-disabled when output isn't a terminal.
+
+`tabulate` is the only added dependency; everything else uses the standard library.
+
 ## 📸 Demo Walkthrough
 
 **Features:** Sorting by time · Priority ordering · Conflict warnings · Filtering by pet/status · Daily & weekly recurrence

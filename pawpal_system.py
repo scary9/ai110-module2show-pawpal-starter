@@ -308,6 +308,43 @@ class DailyPlan:
             )
         return "\n".join(lines)
 
+    def next_available_slot(
+        self, duration_minutes: int, after: datetime | None = None
+    ) -> datetime | None:
+        """Earliest start time at which a task of ``duration_minutes`` fits.
+
+        Scans the owner's availability windows in order and returns the first
+        moment where a slot of the requested length opens up without overlapping
+        anything already scheduled in this plan.
+
+        after : ignore any slot starting before this datetime; defaults to the
+                start of the plan's date. Pass the current time to answer
+                "when's the next free slot from now?".
+
+        Returns the start datetime, or None if nothing fits (only possible when
+        availability windows are set and every one is too full or too short).
+        With no availability set the owner is treated as always free, so a slot
+        is always found.
+        """
+        duration = timedelta(minutes=duration_minutes)
+        earliest = after or datetime.combine(self.date, datetime.min.time())
+        # Existing bookings, earliest first, so we can sweep them once per window.
+        busy = sorted(self.tasks, key=lambda t: t.start_time)
+        windows = self.owner.availability or [(earliest, datetime.max)]
+
+        for start, end in sorted(windows):
+            cursor = max(start, earliest)
+            # Push the cursor past any task that would overlap [cursor, cursor+d).
+            for task in busy:
+                if task.end_time <= cursor:
+                    continue  # already behind us
+                if task.start_time >= cursor + duration:
+                    break  # a gap of at least `duration` opened before this task
+                cursor = max(cursor, task.end_time)
+            if cursor + duration <= end:
+                return cursor
+        return None
+
     # --- internal scheduling helpers -------------------------------------
 
     def _within_availability(self, task: Task) -> bool:
